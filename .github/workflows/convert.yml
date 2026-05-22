@@ -13,8 +13,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install ffmpeg python
-          pip3 install gdown
+          brew install ffmpeg pipx
+          pipx install gdown
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Download webm files from Google Drive
         run: |
