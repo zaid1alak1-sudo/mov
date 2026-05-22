@@ -1,0 +1,33 @@
+name: Convert WebM to MOV (HEVC Alpha)
+
+on:
+  workflow_dispatch:  # تشغيل يدوي بضغطة زر
+
+jobs:
+  convert:
+    runs-on: macos-latest  # Mac مجاني على public repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install ffmpeg python
+          pip3 install gdown
+
+      - name: Download webm files from Google Drive
+        run: |
+          gdown --folder "https://drive.google.com/drive/folders/1H4rVdWkyCXIC0hsl6Av4xwfp4_9kDYEx" \
+                --output webm_3 \
+                --remaining-ok
+
+      - name: Run conversion script
+        run: python3 convert_mac.py
+
+      - name: Upload mov_output as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mov_output
+          path: mov_output/
+          retention-days: 7
