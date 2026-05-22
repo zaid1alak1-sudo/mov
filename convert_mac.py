@@ -32,7 +32,7 @@ def convert_file(input_path: Path) -> tuple[str, bool, float, str]:
         "-c:v", "hevc_videotoolbox",
         "-allow_sw", "1",
         "-alpha_quality", "0.75",
-        "-q:v", "60",
+        "-q:v", "90",
         "-tag:v", "hvc1",
         "-c:a", "aac",
         "-b:a", "64k",
