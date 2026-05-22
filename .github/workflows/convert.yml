@@ -20,8 +20,7 @@ jobs:
       - name: Download webm files from Google Drive
         run: |
           gdown --folder "https://drive.google.com/drive/folders/1H4rVdWkyCXIC0hsl6Av4xwfp4_9kDYEx" \
-                --output webm_3 \
-                --remaining-ok
+                --output webm_3
 
       - name: Run conversion script
         run: python3 convert_mac.py
