@@ -1,11 +1,16 @@
 name: Convert WebM to MOV (HEVC Alpha)
 
 on:
-  workflow_dispatch:  # تشغيل يدوي بضغطة زر
+  workflow_dispatch:
+    inputs:
+      batch_name:
+        description: 'اسم المجلد داخل Drive (مثال: batch_01)'
+        required: true
+        type: string
 
 jobs:
   convert:
-    runs-on: macos-latest  # Mac مجاني على public repo
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repo
@@ -17,17 +22,20 @@ jobs:
           pipx install gdown
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Download webm files from Google Drive
+      - name: Download batch from Google Drive
         run: |
-          gdown --folder "https://drive.google.com/drive/folders/1H4rVdWkyCXIC0hsl6Av4xwfp4_9kDYEx" \
-                --output webm_3
+          # تحميل المجلد الرئيسي كاملاً ثم نأخذ المجلد المطلوب فقط
+          gdown --folder "https://drive.google.com/drive/folders/1m6ghpKQvonIaJHwrIPbFyDqJ9KbsbHNX" \
+                --output webm_batches
+          # ننقل الملفات من المجلد المحدد إلى webm_3
+          mv "webm_batches/${{ github.event.inputs.batch_name }}" webm_3
 
       - name: Run conversion script
         run: python3 convert_mac.py
 
-      - name: Upload mov_output as artifact
+      - name: Upload result as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mov_output
+          name: mov_${{ github.event.inputs.batch_name }}
           path: mov_output/
           retention-days: 7
