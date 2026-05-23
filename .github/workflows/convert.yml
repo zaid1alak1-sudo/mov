@@ -3,8 +3,12 @@ name: Convert WebM to MOV (HEVC Alpha)
 on:
   workflow_dispatch:
     inputs:
+      folder_id:
+        description: 'Google Drive Folder ID'
+        required: true
+        type: string
       batch_name:
-        description: 'اسم المجلد داخل Drive (مثال: batch_01)'
+        description: 'Batch name for artifact (e.g. batch_01)'
         required: true
         type: string
 
@@ -24,11 +28,8 @@ jobs:
 
       - name: Download batch from Google Drive
         run: |
-          # تحميل المجلد الرئيسي كاملاً ثم نأخذ المجلد المطلوب فقط
-          gdown --folder "https://drive.google.com/drive/folders/1m6ghpKQvonIaJHwrIPbFyDqJ9KbsbHNX" \
-                --output webm_batches
-          # ننقل الملفات من المجلد المحدد إلى webm_3
-          mv "webm_batches/${{ github.event.inputs.batch_name }}" webm_3
+          gdown --folder "https://drive.google.com/drive/folders/${{ github.event.inputs.folder_id }}" \
+                --output webm_3
 
       - name: Run conversion script
         run: python3 convert_mac.py
