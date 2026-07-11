@@ -13,7 +13,7 @@ from pathlib import Path
 
 INPUT_DIR  = Path("webm_3")
 OUTPUT_DIR = Path("mov_output")
-MAX_WORKERS = max(1, os.cpu_count() - 1)
+MAX_WORKERS = 1  # واحد فقط — VideoToolbox يعلق مع التوازي على GitHub runners
 
 
 def convert_file(input_path: Path) -> tuple[str, bool, float, str]:
@@ -28,7 +28,9 @@ def convert_file(input_path: Path) -> tuple[str, bool, float, str]:
     cmd = [
         "ffmpeg", "-y",
         "-vcodec", "libvpx-vp9",
+        "-r", "20",
         "-i", str(input_path),
+        "-fps_mode", "cfr",
         "-c:v", "hevc_videotoolbox",
         "-allow_sw", "1",
         "-alpha_quality", "0.75",
@@ -42,13 +44,15 @@ def convert_file(input_path: Path) -> tuple[str, bool, float, str]:
 
     t0 = time.time()
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
         elapsed = time.time() - t0
         if result.returncode != 0:
             err_lines = [l for l in result.stderr.splitlines() if l.strip()]
             err_msg = err_lines[-1] if err_lines else "unknown error"
             return (str(rel), False, elapsed, err_msg)
         return (str(rel), True, elapsed, "")
+    except subprocess.TimeoutExpired:
+        return (str(rel), False, time.time() - t0, "TIMEOUT (>900s)")
     except Exception as e:
         return (str(rel), False, time.time() - t0, str(e))
 
@@ -86,7 +90,8 @@ def main():
         print("\n[!] الملفات الفاشلة:")
         for name, err in failed:
             print(f"    {name}: {err}")
-        sys.exit(1)
+        # لا نوقف التنفيذ — الملفات الناجحة تُرفع كـ artifact
+        print("\n[*] الملفات الناجحة سيتم رفعها كـ artifact")
 
 
 if __name__ == "__main__":
